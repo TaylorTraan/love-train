@@ -39,7 +39,14 @@ export default function StationScene({
       }}
       transition={{ duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] }}
       onAnimationComplete={(definition) => {
-        if (isExiting && definition?.opacity === 0 && onExitComplete) {
+        if (
+          isExiting &&
+          typeof definition === "object" &&
+          definition !== null &&
+          "opacity" in definition &&
+          definition.opacity === 0 &&
+          onExitComplete
+        ) {
           onExitComplete();
         }
       }}
