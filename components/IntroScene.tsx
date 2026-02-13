@@ -20,7 +20,7 @@ export default function IntroScene({ onStart }: IntroSceneProps) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        The Taylor & Jamie Love Train
+        The Taylor & Jamie Love Adventure
       </motion.h1>
       <motion.p
         className="mt-4 text-lg md:text-xl text-stone-600 text-center px-4"

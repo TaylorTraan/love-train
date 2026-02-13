@@ -10,7 +10,7 @@ const cormorant = Cormorant_Garamond({
 });
 
 export const metadata: Metadata = {
-  title: "The Taylor & Jamie Love Train",
+  title: "The Taylor & Jamie Love Adventure",
   description: "6 Years. 30 Memories. One Journey.",
 };
 
