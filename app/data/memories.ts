@@ -74,7 +74,7 @@ export const memories: MemoryYear[] = [
     photos: [
       { src: "/images/year6/DSC00448.JPG", caption: "JAPANNNNNNNNN WE NEED TO GO BACK AGAINNNNN!!!!", date: "2026" },
       { src: "/images/year6/DSC08650.JPG", caption: "KOREAAAAAAA", date: "2026" },
-      { src: "/images/year6/IMG_9539.jpeg", caption: "I want to travel the world with you.  I want to see everything with you.", date: "2026", rotate180: true },
+      { src: "/images/year6/IMG_9539.jpeg", caption: "I want to travel the world with you.  I want to see everything with you.", date: "2026"},
       { src: "/images/year6/IMG_9564.jpeg", caption: "I can't wait to see what the future holds for us.", date: "2026" },
       { src: "/images/year6/IMG_9578.jpeg", caption: "I love you, Jamie, and I always will.", date: "2026" },
     ],
