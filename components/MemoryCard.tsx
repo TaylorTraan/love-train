@@ -37,7 +37,7 @@ export default function MemoryCard({ photo, index, onOpen }: MemoryCardProps) {
           alt={photo.caption}
           fill
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 20vw"
-          className="object-cover"
+          className={`object-cover ${photo.rotate180 ? "rotate-180" : ""}`}
           loading="lazy"
           priority={false}
           unoptimized={photo.src.endsWith(".svg")}

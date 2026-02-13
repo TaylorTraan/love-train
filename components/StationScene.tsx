@@ -85,15 +85,6 @@ export default function StationScene({
           </button>
         </motion.div>
       )}
-
-      {/* Temporary test button - skip to next station without opening all photos */}
-      <button
-        type="button"
-        onClick={onNextStation}
-        className="absolute top-4 right-4 px-3 py-1.5 rounded-lg text-xs font-medium text-stone-500 bg-white/80 border border-stone-300 hover:bg-stone-50 transition-colors"
-      >
-        Next (test)
-      </button>
     </motion.section>
   );
 }

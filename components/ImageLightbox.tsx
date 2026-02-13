@@ -41,7 +41,7 @@ export default function ImageLightbox({ photo, onClose }: ImageLightboxProps) {
             src={photo.src}
             alt={photo.caption}
             fill
-            className="object-contain"
+            className={`object-contain ${photo.rotate180 ? "rotate-180" : ""}`}
             unoptimized={photo.src.endsWith(".svg")}
             sizes="(max-width: 768px) 100vw, 896px"
           />

@@ -62,7 +62,7 @@ export default function MemoryTimeline({ photos, onSelectPhoto }: MemoryTimeline
                 src={photo.src}
                 alt={photo.caption}
                 fill
-                className="object-cover"
+                className={`object-cover ${photo.rotate180 ? "rotate-180" : ""}`}
                 unoptimized={photo.src.endsWith(".svg")}
                 sizes="112px"
               />
