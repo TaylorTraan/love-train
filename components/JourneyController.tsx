@@ -46,6 +46,12 @@ export default function JourneyController() {
     setPhase("travel");
   }, [stationIndex]);
 
+  const handleRestart = useCallback(() => {
+    setPhase("intro");
+    setStationIndex(0);
+    setClosedPerStation(Array.from({ length: STATION_COUNT }, () => new Set()));
+  }, []);
+
   return (
     <>
       <ParallaxBackground />
@@ -70,17 +76,24 @@ export default function JourneyController() {
           showNextButton={showNextButton}
         />
       )}
-      {phase === "final" && <FinalScene />}
+      {phase === "final" && <FinalScene onRestart={handleRestart} />}
     </>
   );
 }
 
-function FinalScene() {
+function FinalScene({ onRestart }: { onRestart: () => void }) {
   return (
     <section className="fixed inset-0 z-10 flex flex-col items-center justify-center px-6 bg-gradient-to-b from-amber-100/95 via-orange-200/90 to-rose-300/85">
       <p className="text-2xl md:text-4xl font-medium text-stone-800 text-center max-w-2xl">
         And this is only the beginning.
       </p>
+      <button
+        type="button"
+        onClick={onRestart}
+        className="mt-8 px-8 py-4 rounded-2xl bg-rose-500 hover:bg-rose-600 text-white font-medium text-lg shadow-lg hover:shadow-xl transition-all border-2 border-rose-400/80"
+      >
+        Travel again
+      </button>
     </section>
   );
 }
