@@ -118,7 +118,7 @@ function FinalScene({
 }) {
   return (
     <motion.section
-      className="fixed inset-0 z-10 flex flex-col items-center justify-center px-6 bg-gradient-to-b from-indigo-950 via-slate-950 to-slate-950"
+      className="fixed inset-0 z-10 flex flex-col items-center justify-center px-6"
       initial={{ opacity: 0 }}
       animate={{
         opacity: isExiting ? 0 : 1,
