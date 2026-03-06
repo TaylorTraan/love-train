@@ -96,7 +96,6 @@ export default function JourneyController() {
 
   const handleOpenMusic = useCallback(() => {
     setPhase("music");
-    setPlayerVisible(true);
   }, []);
 
   const handleBackFromMusic = useCallback(() => {
