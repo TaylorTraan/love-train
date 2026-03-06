@@ -6,9 +6,7 @@ import { motion } from "framer-motion";
 type PlaylistTrack = {
   name: string;
   artists: string;
-  albumArt: string | null;
   url: string;
-  previewUrl: string | null;
 };
 
 type PlaylistData = {
@@ -106,17 +104,11 @@ export default function MusicView({ onBack, playlistId: playlistIdProp }: MusicV
                   href={track.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-3 p-2 rounded-lg bg-stone-200/80 dark:bg-stone-700/60 hover:bg-stone-300/80 dark:hover:bg-stone-600/60 transition-colors border border-stone-300/60"
+                  className="flex items-center gap-3 p-3 rounded-lg bg-stone-200/80 dark:bg-stone-700/60 hover:bg-stone-300/80 dark:hover:bg-stone-600/60 transition-colors border border-stone-300/60"
                 >
-                  {track.albumArt && (
-                    <img
-                      src={track.albumArt}
-                      alt=""
-                      className="w-10 h-10 rounded object-cover flex-shrink-0"
-                      width={40}
-                      height={40}
-                    />
-                  )}
+                  <span className="text-stone-400 text-sm font-medium w-6 text-right flex-shrink-0">
+                    {i + 1}
+                  </span>
                   <div className="min-w-0 flex-1">
                     <span className="font-medium text-stone-800 dark:text-stone-100 truncate block">
                       {track.name}
@@ -137,8 +129,7 @@ export default function MusicView({ onBack, playlistId: playlistIdProp }: MusicV
 
       {apiError && !data && playlistId && (
         <p className="text-center text-stone-500 text-sm mt-4">
-          Track list unavailable. Configure SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, and
-          SPOTIFY_PLAYLIST_ID for a custom list.
+          Track list unavailable. Make sure SPOTIFY_PLAYLIST_ID is configured.
         </p>
       )}
     </motion.section>

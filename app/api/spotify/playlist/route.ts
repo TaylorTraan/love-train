@@ -1,42 +1,9 @@
 import { NextResponse } from "next/server";
 
-const SPOTIFY_TOKEN_URL = "https://accounts.spotify.com/api/token";
-const SPOTIFY_API_BASE = "https://api.spotify.com/v1";
-
-type TokenCache = { token: string; expiresAt: number } | null;
-let tokenCache: TokenCache = null;
-
-async function getAccessToken(): Promise<string | null> {
-  const clientId = process.env.SPOTIFY_CLIENT_ID;
-  const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
-  if (!clientId || !clientSecret) return null;
-
-  if (tokenCache && tokenCache.expiresAt > Date.now() + 60_000) {
-    return tokenCache.token;
-  }
-
-  const res = await fetch(SPOTIFY_TOKEN_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-      Authorization: `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString("base64")}`,
-    },
-    body: "grant_type=client_credentials",
-  });
-
-  if (!res.ok) return null;
-  const data = (await res.json()) as { access_token: string; expires_in: number };
-  const expiresInMs = (data.expires_in ?? 3600) * 1000;
-  tokenCache = { token: data.access_token, expiresAt: Date.now() + expiresInMs };
-  return data.access_token;
-}
-
 export type PlaylistTrack = {
   name: string;
   artists: string;
-  albumArt: string | null;
   url: string;
-  previewUrl: string | null;
 };
 
 export type PlaylistResponse = {
@@ -46,6 +13,7 @@ export type PlaylistResponse = {
 
 export async function GET() {
   const playlistId = process.env.SPOTIFY_PLAYLIST_ID;
+
   if (!playlistId) {
     return NextResponse.json(
       { error: "SPOTIFY_PLAYLIST_ID not configured" },
@@ -53,70 +21,69 @@ export async function GET() {
     );
   }
 
-  const token = await getAccessToken();
-  if (!token) {
-    return NextResponse.json(
-      { error: "Spotify credentials not configured or token failed" },
-      { status: 503 }
-    );
-  }
-
-  const headers = { Authorization: `Bearer ${token}` };
-
   try {
-    const [playlistRes, tracksRes] = await Promise.all([
-      fetch(`${SPOTIFY_API_BASE}/playlists/${playlistId}`, { headers }),
-      fetch(`${SPOTIFY_API_BASE}/playlists/${playlistId}/tracks?limit=50`, { headers }),
-    ]);
+    const embedUrl = `https://open.spotify.com/embed/playlist/${playlistId}`;
+    const res = await fetch(embedUrl, {
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+      },
+    });
 
-    if (!playlistRes.ok) {
-      const err = await playlistRes.text();
+    if (!res.ok) {
       return NextResponse.json(
-        { error: "Playlist fetch failed", details: err },
-        { status: playlistRes.status === 404 ? 404 : 502 }
+        { error: "Failed to fetch embed page", status: res.status },
+        { status: 502 }
       );
     }
 
-    const playlistData = (await playlistRes.json()) as {
-      name: string;
-      external_urls: { spotify: string };
-      images: Array<{ url: string }>;
-    };
+    const html = await res.text();
+
+    const scriptMatch = html.match(
+      /<script\s+id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/
+    );
+
+    if (!scriptMatch) {
+      return NextResponse.json(
+        { error: "Could not parse embed data" },
+        { status: 502 }
+      );
+    }
+
+    const nextData = JSON.parse(scriptMatch[1]);
+    const entity = nextData?.props?.pageProps?.state?.data?.entity;
+
+    if (!entity) {
+      return NextResponse.json(
+        { error: "No entity data in embed response" },
+        { status: 502 }
+      );
+    }
 
     const playlist = {
-      name: playlistData.name,
-      url: playlistData.external_urls?.spotify ?? `https://open.spotify.com/playlist/${playlistId}`,
-      image: playlistData.images?.[0]?.url ?? null,
+      name: entity.name ?? "Playlist",
+      url: `https://open.spotify.com/playlist/${playlistId}`,
+      image: entity.coverArt?.sources?.[0]?.url ?? null,
     };
 
-    let tracks: PlaylistTrack[] = [];
-    if (tracksRes.ok) {
-      const tracksData = (await tracksRes.json()) as {
-        items: Array<{
-          track: {
-            name: string;
-            artists: Array<{ name: string }>;
-            album: { images: Array<{ url: string }> };
-            external_urls: { spotify: string };
-            preview_url: string | null;
-          } | null;
-        }>;
-      };
-      tracks = (tracksData.items ?? [])
-        .filter((item): item is { track: NonNullable<typeof item.track> } => item.track != null)
-        .map(({ track }) => ({
-          name: track.name,
-          artists: track.artists?.map((a) => a.name).join(", ") ?? "",
-          albumArt: track.album?.images?.[0]?.url ?? null,
-          url: track.external_urls?.spotify ?? "",
-          previewUrl: track.preview_url ?? null,
-        }));
-    }
+    const trackList = entity.trackList ?? [];
+    const tracks: PlaylistTrack[] = trackList.map(
+      (t: { title?: string; subtitle?: string; uri?: string }) => {
+        const trackId = t.uri?.split(":").pop();
+        return {
+          name: t.title ?? "",
+          artists: (t.subtitle ?? "").replace(/\u00a0/g, " "),
+          url: trackId
+            ? `https://open.spotify.com/track/${trackId}`
+            : `https://open.spotify.com/playlist/${playlistId}`,
+        };
+      }
+    );
 
     return NextResponse.json({ playlist, tracks } satisfies PlaylistResponse);
   } catch (e) {
     return NextResponse.json(
-      { error: "Spotify API error", details: String(e) },
+      { error: "Spotify fetch error", details: String(e) },
       { status: 502 }
     );
   }
