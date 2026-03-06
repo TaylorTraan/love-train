@@ -83,7 +83,7 @@ export default function MusicView({ onBack, playlistId: playlistIdProp }: MusicV
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
         >
-          Use the player at the bottom of the page to play. It keeps playing as you explore the site—click the arrow on the left of the bar to expand or collapse it.
+          Click the Music button to open the player. It keeps playing as you explore the site—use the arrow on the left of the bar to expand/collapse it.
         </motion.p>
       ) : (
         <p className="text-center text-stone-500 mb-4">
