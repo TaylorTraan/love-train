@@ -3,8 +3,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
-const EMBED_BASE = "https://open.spotify.com/embed/playlist";
-
 type PlaylistTrack = {
   name: string;
   artists: string;
@@ -54,7 +52,7 @@ export default function MusicView({ onBack, playlistId: playlistIdProp }: MusicV
 
   return (
     <motion.section
-      className="fixed inset-0 z-10 flex flex-col overflow-hidden px-4 pt-6 pb-8"
+      className="fixed inset-0 z-10 flex flex-col overflow-hidden px-4 pt-6 pb-28"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
@@ -79,23 +77,14 @@ export default function MusicView({ onBack, playlistId: playlistIdProp }: MusicV
       </motion.h2>
 
       {playlistId ? (
-        <motion.div
-          className="w-full max-w-2xl mx-auto flex-shrink-0"
+        <motion.p
+          className="text-center text-stone-600 text-sm mb-4 max-w-md mx-auto"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
         >
-          <iframe
-            title="Spotify playlist"
-            src={`${EMBED_BASE}/${playlistId}`}
-            width="100%"
-            height="352"
-            allowFullScreen
-            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-            loading="lazy"
-            className="rounded-xl border-0"
-          />
-        </motion.div>
+          Use the player at the bottom of the page to play. It keeps playing as you explore the site—click the arrow on the left of the bar to expand or collapse it.
+        </motion.p>
       ) : (
         <p className="text-center text-stone-500 mb-4">
           Set NEXT_PUBLIC_SPOTIFY_PLAYLIST_ID or pass playlistId to show the player.

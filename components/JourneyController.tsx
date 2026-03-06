@@ -6,6 +6,7 @@ import { memories } from "@/app/data/memories";
 import MainMenuScene from "./MainMenuScene";
 import AnniversaryView from "./AnniversaryView";
 import MusicView from "./MusicView";
+import PersistentSpotifyPlayer from "./PersistentSpotifyPlayer";
 import IntroScene from "./IntroScene";
 import TravelScene from "./TravelScene";
 import StationScene from "./StationScene";
@@ -15,8 +16,12 @@ export type JourneyPhase = "mainMenu" | "anniversary" | "music" | "intro" | "rea
 
 const STATION_COUNT = memories.length;
 
+const playlistId =
+  (typeof process !== "undefined" && process.env.NEXT_PUBLIC_SPOTIFY_PLAYLIST_ID) || null;
+
 export default function JourneyController() {
   const [phase, setPhase] = useState<JourneyPhase>("mainMenu");
+  const [playerExpanded, setPlayerExpanded] = useState(false);
   const [stationIndex, setStationIndex] = useState(0);
   const [closedPerStation, setClosedPerStation] = useState<Set<number>[]>(
     () => Array.from({ length: STATION_COUNT }, () => new Set())
@@ -97,9 +102,20 @@ export default function JourneyController() {
     setPhase("mainMenu");
   }, []);
 
+  const handleTogglePlayer = useCallback(() => {
+    setPlayerExpanded((e) => !e);
+  }, []);
+
   return (
     <>
       <ParallaxBackground pageThemeIndex={pageThemeIndex} />
+      {playlistId && (
+        <PersistentSpotifyPlayer
+          playlistId={playlistId}
+          expanded={playerExpanded}
+          onToggleExpand={handleTogglePlayer}
+        />
+      )}
       {phase === "mainMenu" && (
         <MainMenuScene
           onStartJourney={handleStartJourney}
