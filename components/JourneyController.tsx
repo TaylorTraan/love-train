@@ -5,23 +5,29 @@ import { motion } from "framer-motion";
 import { memories } from "@/app/data/memories";
 import MainMenuScene from "./MainMenuScene";
 import AnniversaryView from "./AnniversaryView";
+import MusicView from "./MusicView";
+import PersistentSpotifyPlayer from "./PersistentSpotifyPlayer";
 import IntroScene from "./IntroScene";
 import TravelScene from "./TravelScene";
 import StationScene from "./StationScene";
 import ParallaxBackground, { type PageThemeIndex } from "./ParallaxBackground";
 
-export type JourneyPhase = "mainMenu" | "anniversary" | "intro" | "ready" | "travel" | "station" | "final";
+export type JourneyPhase = "mainMenu" | "anniversary" | "music" | "intro" | "ready" | "travel" | "station" | "final";
 
 const STATION_COUNT = memories.length;
 
+const playlistId =
+  (typeof process !== "undefined" && process.env.NEXT_PUBLIC_SPOTIFY_PLAYLIST_ID) || null;
+
 export default function JourneyController() {
   const [phase, setPhase] = useState<JourneyPhase>("mainMenu");
+  const [playerVisible, setPlayerVisible] = useState(false);
   const [stationIndex, setStationIndex] = useState(0);
   const [closedPerStation, setClosedPerStation] = useState<Set<number>[]>(
     () => Array.from({ length: STATION_COUNT }, () => new Set())
   );
 
-  const showNextButton = closedPerStation[stationIndex]?.size === 5;
+  const showNextButton = true;
 
   const handleStart = useCallback(() => {
     setPhase("travel");
@@ -72,7 +78,7 @@ export default function JourneyController() {
   const pageThemeIndex: PageThemeIndex =
     phase === "final"
       ? 7
-      : phase === "mainMenu" || phase === "anniversary" || phase === "intro" || phase === "ready"
+      : phase === "mainMenu" || phase === "anniversary" || phase === "music" || phase === "intro" || phase === "ready"
         ? 0
         : ((stationIndex + 1) as PageThemeIndex);
 
@@ -88,17 +94,62 @@ export default function JourneyController() {
     setPhase("mainMenu");
   }, []);
 
+  const handleOpenMusic = useCallback(() => {
+    setPhase("music");
+    setPlayerVisible(true);
+  }, []);
+
+  const handleBackFromMusic = useCallback(() => {
+    setPhase("mainMenu");
+  }, []);
+
+  const handleMinimizePlayer = useCallback(() => {
+    setPlayerVisible(false);
+  }, []);
+
   return (
     <>
       <ParallaxBackground pageThemeIndex={pageThemeIndex} />
+      {playlistId && !playerVisible && (
+        <button
+          type="button"
+          onClick={() => setPlayerVisible(true)}
+          className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-full bg-stone-700/95 hover:bg-stone-600 text-stone-100 shadow-lg hover:shadow-xl transition-all duration-200 border border-stone-600/50"
+          aria-label="Show music player"
+          title="Show music player"
+        >
+          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden>
+            <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z" />
+          </svg>
+          <span className="font-medium">Music</span>
+        </button>
+      )}
+      {playlistId && (
+        <motion.div
+          className="fixed bottom-0 left-0 right-0 z-50"
+          initial={false}
+          animate={playerVisible ? { y: 0 } : { y: "100%" }}
+          transition={{ type: "tween", duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
+          style={{ pointerEvents: playerVisible ? "auto" : "none" }}
+        >
+          <PersistentSpotifyPlayer
+            playlistId={playlistId}
+            onMinimize={handleMinimizePlayer}
+          />
+        </motion.div>
+      )}
       {phase === "mainMenu" && (
         <MainMenuScene
           onStartJourney={handleStartJourney}
           onOpenAnniversary={handleOpenAnniversary}
+          onOpenMusic={handleOpenMusic}
         />
       )}
       {phase === "anniversary" && (
         <AnniversaryView onBack={handleBackFromAnniversary} />
+      )}
+      {phase === "music" && (
+        <MusicView onBack={handleBackFromMusic} />
       )}
       {(phase === "intro" || phase === "ready") && (
         <IntroScene onStart={handleStart} />
