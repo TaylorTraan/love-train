@@ -3,17 +3,19 @@
 import { useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import { memories } from "@/app/data/memories";
+import MainMenuScene from "./MainMenuScene";
+import AnniversaryView from "./AnniversaryView";
 import IntroScene from "./IntroScene";
 import TravelScene from "./TravelScene";
 import StationScene from "./StationScene";
 import ParallaxBackground, { type PageThemeIndex } from "./ParallaxBackground";
 
-export type JourneyPhase = "intro" | "ready" | "travel" | "station" | "final";
+export type JourneyPhase = "mainMenu" | "anniversary" | "intro" | "ready" | "travel" | "station" | "final";
 
 const STATION_COUNT = memories.length;
 
 export default function JourneyController() {
-  const [phase, setPhase] = useState<JourneyPhase>("intro");
+  const [phase, setPhase] = useState<JourneyPhase>("mainMenu");
   const [stationIndex, setStationIndex] = useState(0);
   const [closedPerStation, setClosedPerStation] = useState<Set<number>[]>(
     () => Array.from({ length: STATION_COUNT }, () => new Set())
@@ -61,7 +63,7 @@ export default function JourneyController() {
   }, []);
 
   const handleRestartComplete = useCallback(() => {
-    setPhase("intro");
+    setPhase("mainMenu");
     setStationIndex(0);
     setClosedPerStation(Array.from({ length: STATION_COUNT }, () => new Set()));
     setIsRestarting(false);
@@ -70,13 +72,34 @@ export default function JourneyController() {
   const pageThemeIndex: PageThemeIndex =
     phase === "final"
       ? 7
-      : phase === "intro" || phase === "ready"
+      : phase === "mainMenu" || phase === "anniversary" || phase === "intro" || phase === "ready"
         ? 0
         : ((stationIndex + 1) as PageThemeIndex);
+
+  const handleStartJourney = useCallback(() => {
+    setPhase("intro");
+  }, []);
+
+  const handleOpenAnniversary = useCallback(() => {
+    setPhase("anniversary");
+  }, []);
+
+  const handleBackFromAnniversary = useCallback(() => {
+    setPhase("mainMenu");
+  }, []);
 
   return (
     <>
       <ParallaxBackground pageThemeIndex={pageThemeIndex} />
+      {phase === "mainMenu" && (
+        <MainMenuScene
+          onStartJourney={handleStartJourney}
+          onOpenAnniversary={handleOpenAnniversary}
+        />
+      )}
+      {phase === "anniversary" && (
+        <AnniversaryView onBack={handleBackFromAnniversary} />
+      )}
       {(phase === "intro" || phase === "ready") && (
         <IntroScene onStart={handleStart} />
       )}
