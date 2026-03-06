@@ -4,12 +4,13 @@ import { useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import { memories } from "@/app/data/memories";
 import MainMenuScene from "./MainMenuScene";
+import AnniversaryView from "./AnniversaryView";
 import IntroScene from "./IntroScene";
 import TravelScene from "./TravelScene";
 import StationScene from "./StationScene";
 import ParallaxBackground, { type PageThemeIndex } from "./ParallaxBackground";
 
-export type JourneyPhase = "mainMenu" | "intro" | "ready" | "travel" | "station" | "final";
+export type JourneyPhase = "mainMenu" | "anniversary" | "intro" | "ready" | "travel" | "station" | "final";
 
 const STATION_COUNT = memories.length;
 
@@ -71,7 +72,7 @@ export default function JourneyController() {
   const pageThemeIndex: PageThemeIndex =
     phase === "final"
       ? 7
-      : phase === "mainMenu" || phase === "intro" || phase === "ready"
+      : phase === "mainMenu" || phase === "anniversary" || phase === "intro" || phase === "ready"
         ? 0
         : ((stationIndex + 1) as PageThemeIndex);
 
@@ -79,11 +80,25 @@ export default function JourneyController() {
     setPhase("intro");
   }, []);
 
+  const handleOpenAnniversary = useCallback(() => {
+    setPhase("anniversary");
+  }, []);
+
+  const handleBackFromAnniversary = useCallback(() => {
+    setPhase("mainMenu");
+  }, []);
+
   return (
     <>
       <ParallaxBackground pageThemeIndex={pageThemeIndex} />
       {phase === "mainMenu" && (
-        <MainMenuScene onStartJourney={handleStartJourney} />
+        <MainMenuScene
+          onStartJourney={handleStartJourney}
+          onOpenAnniversary={handleOpenAnniversary}
+        />
+      )}
+      {phase === "anniversary" && (
+        <AnniversaryView onBack={handleBackFromAnniversary} />
       )}
       {(phase === "intro" || phase === "ready") && (
         <IntroScene onStart={handleStart} />

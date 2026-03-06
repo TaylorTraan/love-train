@@ -4,9 +4,10 @@ import { motion } from "framer-motion";
 
 interface MainMenuSceneProps {
   onStartJourney: () => void;
+  onOpenAnniversary?: () => void;
 }
 
-export default function MainMenuScene({ onStartJourney }: MainMenuSceneProps) {
+export default function MainMenuScene({ onStartJourney, onOpenAnniversary }: MainMenuSceneProps) {
   return (
     <motion.section
       className="fixed inset-0 z-10 flex flex-col items-center justify-center overflow-hidden"
@@ -37,9 +38,10 @@ export default function MainMenuScene({ onStartJourney }: MainMenuSceneProps) {
         </button>
         <button
           type="button"
+          onClick={onOpenAnniversary}
           className="px-8 py-4 rounded-2xl bg-stone-600 hover:bg-stone-500 text-stone-100 font-medium text-lg shadow-lg hover:shadow-xl transition-all border border-stone-500/50"
         >
-          Something else
+          Anniversary countdown
         </button>
       </motion.div>
     </motion.section>
